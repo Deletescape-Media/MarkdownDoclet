@@ -112,6 +112,11 @@ public class MDBuilder {
     return this;
   }
 
+  public MDBuilder softWrap() {
+    sb.append("  \n");
+    return this;
+  }
+
   public String get() {
     return sb.toString();
   }
