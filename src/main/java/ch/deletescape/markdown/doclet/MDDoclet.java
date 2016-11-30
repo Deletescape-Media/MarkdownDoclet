@@ -115,7 +115,7 @@ public class MDDoclet extends Doclet {
     ThrowsTag[] tags = methodDoc.throwsTags();
     for (int i = 0; i < tags.length; i++) {
       if (i == 0) {
-        builder.header(4).text("See Also:", true);
+        builder.header(4).text("Throws:", true);
         builder.newList();
       } else {
         builder.listItem();
