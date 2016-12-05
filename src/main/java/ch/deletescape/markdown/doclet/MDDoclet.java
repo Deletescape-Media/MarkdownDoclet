@@ -84,8 +84,10 @@ public class MDDoclet extends Doclet {
   }
 
   private static String linkEncode(String str) {
-    String tmp = str.replaceAll("[^\\w- ]", "").trim().replace("^[(.*)]$", "$1").replaceAll(" ", "-");
-    return tmp;
+    String tmp = str.trim().replace("^[(.*)]$", "$1");
+    tmp = tmp.replaceAll("[^\\w- ]", "").trim();
+    tmp = tmp.trim();
+    return tmp.replaceAll(" ", "-");
   }
 
   private static void methodDetail(MDBuilder builder, ClassDoc classDoc) {
