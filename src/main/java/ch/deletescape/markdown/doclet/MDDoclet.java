@@ -43,11 +43,15 @@ public class MDDoclet extends Doclet {
   }
 
   private static void methodSummary(MDBuilder builder, ClassDoc classDoc) {
-    for (MethodDoc methodDoc : classDoc.methods()) {
-      builder.header(3).text(methodDoc.modifiers()).text(" ");
-      methodSignature(builder, methodDoc);
-      builder.text(codeAndLinkParse(methodDoc.commentText()), true);
+    builder.newList();
+    MethodDoc[] methods = classDoc.methods();
+    for (int i = 0; i < methods.length; i++) {
+      (i == 0 ? builder : builder.listItem()).text(methods[i].modifiers(), TextStyle.BOLD).text(" ");
+      methodSignature(builder, methods[i]);
+      builder.newLine().text("   ");
+      builder.text(codeAndLinkParse(methods[i].commentText()));
     }
+    builder.endList();
   }
 
   private static void methodDetail(MDBuilder builder, ClassDoc classDoc) {
@@ -55,7 +59,7 @@ public class MDDoclet extends Doclet {
     for (MethodDoc methodDoc : classDoc.methods()) {
       builder.header(3).text(methodDoc.modifiers(), TextStyle.ITALIC).text(" ");
       methodSignature(builder, methodDoc);
-      builder.text(codeAndLinkParse(methodDoc.commentText()), true);
+      builder.newLine().text(codeAndLinkParse(methodDoc.commentText()), true);
       methodDetailParameterList(builder, methodDoc);
       methodDetailThrowsTags(builder, methodDoc);
       methodDetailReturnTags(builder, methodDoc);
@@ -128,18 +132,18 @@ public class MDDoclet extends Doclet {
 
   private static void methodSignature(MDBuilder builder, MethodDoc methodDoc) {
     Parameter[] parameters = methodDoc.parameters();
+    builder.text(methodDoc.name(), TextStyle.BOLD);
     if (parameters.length > 0) {
-      builder.text(methodDoc.name()).text("(`");
-
+      builder.text("(`");
       for (int i = 0; i < parameters.length; i++) {
         builder.text(parameters[i].typeName()).text(" ").text(parameters[i].name());
         if (i < parameters.length - 1) {
           builder.text(", ");
         }
       }
-      builder.text("`)", true);
+      builder.text("`)");
     } else {
-      builder.text("()", true);
+      builder.text("()");
     }
   }
 
