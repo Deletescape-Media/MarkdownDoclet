@@ -139,6 +139,7 @@ public class MDDoclet extends Doclet {
 
   private static void methodSignature(MDBuilder builder, MethodDoc methodDoc) {
     Parameter[] parameters = methodDoc.parameters();
+    builder.text(methodDoc.returnType().simpleTypeName(), TextStyle.BOLD).text(" ");
     builder.text(methodDoc.name(), TextStyle.BOLD);
     if (parameters.length > 0) {
       builder.text("(`");
