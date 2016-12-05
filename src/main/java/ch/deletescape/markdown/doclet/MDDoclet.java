@@ -1,11 +1,13 @@
 package ch.deletescape.markdown.doclet;
 
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.sun.javadoc.ClassDoc;
+import com.sun.javadoc.DocErrorReporter;
 import com.sun.javadoc.Doclet;
 import com.sun.javadoc.MethodDoc;
 import com.sun.javadoc.ParamTag;
@@ -19,6 +21,8 @@ import ch.deletescape.markdown.MDBuilder;
 import ch.deletescape.markdown.MDBuilder.TextStyle;
 
 public class MDDoclet extends Doclet {
+  private static Path outDir;
+
   public static boolean start(RootDoc root) {
     for (ClassDoc classDoc : root.classes()) {
       MDBuilder builder = new MDBuilder();
@@ -31,15 +35,38 @@ public class MDDoclet extends Doclet {
       methodDetail(builder, classDoc);
       System.out.println(builder.get());
       try {
-        Files.deleteIfExists(Paths.get(classDoc.name() + ".md"));
-        try (FileWriter fw = new FileWriter(classDoc.name() + ".md")) {
-          fw.write(builder.get());
+        if (outDir == null) {
+          outDir = Paths.get("doc");
+        }
+        if (!Files.exists(outDir)) {
+          Files.createDirectory(outDir);
+        }
+        Path path = outDir.resolve(classDoc.name() + ".md");
+        Files.deleteIfExists(path);
+        try (BufferedWriter bw = Files.newBufferedWriter(path)) {
+          bw.write(builder.get());
         }
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
     return true;
+  }
+
+  public static boolean validOptions(String options[][], DocErrorReporter reporter) {
+    for (String[] opt : options) {
+      if ("-d".equals(opt[0])) {
+        outDir = Paths.get(opt[1]);
+      }
+    }
+    return true;
+  }
+
+  public static int optionLength(String option) {
+    if ("-d".equals(option)) {
+      return 2;
+    }
+    return -1;
   }
 
   private static void methodSummary(MDBuilder builder, ClassDoc classDoc) {
