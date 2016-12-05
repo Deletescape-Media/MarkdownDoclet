@@ -127,15 +127,20 @@ public class MDDoclet extends Doclet {
   }
 
   private static void methodSignature(MDBuilder builder, MethodDoc methodDoc) {
-    builder.text(methodDoc.name()).text("(`");
     Parameter[] parameters = methodDoc.parameters();
-    for (int i = 0; i < parameters.length; i++) {
-      builder.text(parameters[i].typeName()).text(" ").text(parameters[i].name());
-      if (i < parameters.length - 1) {
-        builder.text(", ");
+    if (parameters.length > 0) {
+      builder.text(methodDoc.name()).text("(`");
+
+      for (int i = 0; i < parameters.length; i++) {
+        builder.text(parameters[i].typeName()).text(" ").text(parameters[i].name());
+        if (i < parameters.length - 1) {
+          builder.text(", ");
+        }
       }
+      builder.text("`)", true);
+    } else {
+      builder.text("()", true);
     }
-    builder.text("`)", true);
   }
 
   private static String codeAndLinkParse(String text) {
