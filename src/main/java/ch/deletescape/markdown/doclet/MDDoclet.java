@@ -21,6 +21,7 @@ import ch.deletescape.markdown.MDBuilder;
 import ch.deletescape.markdown.MDBuilder.TextStyle;
 
 public class MDDoclet extends Doclet {
+  private static final String FILE_EXTENSION = ".md";
   private static Path outDir;
 
   public static boolean start(RootDoc root) {
@@ -33,24 +34,26 @@ public class MDDoclet extends Doclet {
       builder.header(2).text("Method Summary", TextStyle.ITALIC, true);
       methodSummary(builder, classDoc);
       methodDetail(builder, classDoc);
-      System.out.println(builder.get());
-      try {
-        if (outDir == null) {
-          outDir = Paths.get("doc");
-        }
-        if (!Files.exists(outDir)) {
-          Files.createDirectory(outDir);
-        }
-        Path path = outDir.resolve(classDoc.name() + ".md");
-        Files.deleteIfExists(path);
-        try (BufferedWriter bw = Files.newBufferedWriter(path)) {
-          bw.write(builder.get());
-        }
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      String filename = classDoc.qualifiedTypeName().replace('.', '/');
+      writeToFile(filename, builder);
     }
     return true;
+  }
+
+  private static void writeToFile(String filename, MDBuilder builder) {
+    try {
+      if (outDir == null) {
+        outDir = Paths.get("doc");
+      }
+      Path path = outDir.resolve(filename + FILE_EXTENSION);
+      Files.createDirectories(path.getParent());
+      Files.deleteIfExists(path);
+      try (BufferedWriter bw = Files.newBufferedWriter(path)) {
+        bw.write(builder.get());
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public static boolean validOptions(String options[][], DocErrorReporter reporter) {
@@ -63,10 +66,12 @@ public class MDDoclet extends Doclet {
   }
 
   public static int optionLength(String option) {
-    if ("-d".equals(option)) {
-      return 2;
+    switch (option) {
+      case "-d":
+        return 2;
+      default:
+        return -1;
     }
-    return -1;
   }
 
   private static void methodSummary(MDBuilder builder, ClassDoc classDoc) {
