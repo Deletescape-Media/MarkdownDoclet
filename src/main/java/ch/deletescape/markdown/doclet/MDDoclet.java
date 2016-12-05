@@ -17,6 +17,7 @@ import ch.deletescape.markdown.MDBuilder.TextStyle;
 public class MDDoclet extends Doclet {
   private static final String FILE_EXTENSION = ".md";
   private static Path outDir;
+  private static boolean flat;
 
   public static boolean start(RootDoc root) {
     if (outDir == null) {
@@ -27,16 +28,23 @@ public class MDDoclet extends Doclet {
       header(classDoc, builder);
       MethodMDDoc.methodSummary(builder, classDoc.methods());
       MethodMDDoc.methodDetail(builder, classDoc.methods());
-      String filename = classDoc.qualifiedTypeName().replace('.', '/');
-      writeToFile(filename, builder.get());
+      writeToFile(filenameFromType(classDoc), builder.get());
     }
     return true;
   }
 
   public static boolean validOptions(String options[][], DocErrorReporter reporter) {
     for (String[] opt : options) {
-      if ("-d".equals(opt[0])) {
-        outDir = Paths.get(opt[1]);
+      switch (opt[0]) {
+        case "-d":
+          outDir = Paths.get(opt[1]);
+          break;
+        case "-flat":
+          flat = true;
+          break;
+        case "-quiet":
+          Util.setQuiet(true);
+          break;
       }
     }
     return true;
@@ -46,9 +54,19 @@ public class MDDoclet extends Doclet {
     switch (option) {
       case "-d":
         return 2;
+      case "-flat":
+      case "-quiet":
+        return 1;
       default:
         return -1;
     }
+  }
+
+  private static String filenameFromType(ClassDoc classDoc) {
+    if (flat) {
+      return classDoc.typeName();
+    }
+    return classDoc.qualifiedTypeName().replace('.', '/');
   }
 
   private static void header(ClassDoc classDoc, MDBuilder builder) {
@@ -63,6 +81,7 @@ public class MDDoclet extends Doclet {
       Path path = outDir.resolve(filename + FILE_EXTENSION);
       Files.createDirectories(path.getParent());
       Files.deleteIfExists(path);
+      Util.println("Writing to" + path.toString() + "...");
       try (BufferedWriter bw = Files.newBufferedWriter(path)) {
         bw.write(text);
       }
