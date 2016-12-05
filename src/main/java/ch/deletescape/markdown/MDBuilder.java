@@ -118,7 +118,7 @@ public class MDBuilder {
   }
 
   public String get() {
-    return sb.toString();
+    return sb.toString().replaceAll("\\n{3,}", "\n\n");
   }
 
   public String getCurrentLine() {
