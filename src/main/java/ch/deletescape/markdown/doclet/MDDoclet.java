@@ -179,9 +179,8 @@ public class MDDoclet extends Doclet {
   private static String codeAndLinkParse(String text) {
     String tmp = text;
     tmp = tmp.replaceAll("\\{@code (.*?)\\}", "`$1`");
-    // Links currently don't work as expected
-    tmp = tmp.replaceAll("\\{@link (.*?)#(\\w*?)\\((.*)\\)\\}", "**$1.$2($3)**");// "[$1.$2($3)]($1.md#$2)");
-    tmp = tmp.replaceAll("\\{@link (.*?)\\}", "**$1**");// "[$1]($1.md)");
-    return tmp;
+    // There is no way to actually properly hook up the links
+    tmp = tmp.replaceAll("\\{@link (.*?)#(\\w*?)\\((.*)\\)\\}", "**$1.$2($3)**");
+    return tmp.replaceAll("\\{@link (.*?)\\}", "**$1**");
   }
 }
