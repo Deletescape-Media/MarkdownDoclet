@@ -15,13 +15,19 @@ import ch.deletescape.markdown.MDBuilder;
 import ch.deletescape.markdown.MDBuilder.TextStyle;
 
 public class MDDoclet extends Doclet {
-  private static final String FILE_EXTENSION = ".md";
+  private static final String DEFAULT_EXTENSION = ".md";
   private static Path outDir;
   private static boolean flat;
+  private static String extension;
 
   public static boolean start(RootDoc root) {
     if (outDir == null) {
       outDir = Paths.get("doc");
+    }
+    if (extension == null) {
+      extension = DEFAULT_EXTENSION;
+    } else {
+      Util.println("Using custom file extension \"" + extension + "\"...");
     }
     for (ClassDoc classDoc : root.classes()) {
       MDBuilder builder = new MDBuilder();
@@ -45,6 +51,9 @@ public class MDDoclet extends Doclet {
         case "-quiet":
           Util.setQuiet(true);
           break;
+        case "-extension":
+          extension = opt[1];
+          break;
       }
     }
     return true;
@@ -53,6 +62,7 @@ public class MDDoclet extends Doclet {
   public static int optionLength(String option) {
     switch (option) {
       case "-d":
+      case "-extension":
         return 2;
       case "-flat":
       case "-quiet":
@@ -78,7 +88,7 @@ public class MDDoclet extends Doclet {
 
   private static void writeToFile(String filename, String text) {
     try {
-      Path path = outDir.resolve(filename + FILE_EXTENSION);
+      Path path = outDir.resolve(filename + extension);
       Files.createDirectories(path.getParent());
       Files.deleteIfExists(path);
       Util.println("Writing to" + path.toString() + "...");
