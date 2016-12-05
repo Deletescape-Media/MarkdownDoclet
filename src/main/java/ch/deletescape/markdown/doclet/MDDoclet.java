@@ -91,7 +91,7 @@ public class MDDoclet extends Doclet {
       Path path = outDir.resolve(filename + extension);
       Files.createDirectories(path.getParent());
       Files.deleteIfExists(path);
-      Util.println("Writing to" + path.toString() + "...");
+      Util.println("Writing to " + path.toString() + "...");
       try (BufferedWriter bw = Files.newBufferedWriter(path)) {
         bw.write(text);
       }
