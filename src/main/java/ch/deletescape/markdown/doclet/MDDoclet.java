@@ -25,6 +25,9 @@ public class MDDoclet extends Doclet {
   private static Path outDir;
 
   public static boolean start(RootDoc root) {
+    if (outDir == null) {
+      outDir = Paths.get("doc");
+    }
     for (ClassDoc classDoc : root.classes()) {
       MDBuilder builder = new MDBuilder();
       builder.header(1).text("Class ").text(classDoc.typeName(), true);
@@ -42,9 +45,6 @@ public class MDDoclet extends Doclet {
 
   private static void writeToFile(String filename, MDBuilder builder) {
     try {
-      if (outDir == null) {
-        outDir = Paths.get("doc");
-      }
       Path path = outDir.resolve(filename + FILE_EXTENSION);
       Files.createDirectories(path.getParent());
       Files.deleteIfExists(path);
@@ -80,9 +80,7 @@ public class MDDoclet extends Doclet {
     for (int i = 0; i < methods.length; i++) {
       (i == 0 ? builder : builder.listItem()).text("[").text(methods[i].modifiers(), TextStyle.BOLD).text(" ");
       methodSignature(builder, methods[i]);
-      builder.text("]");
-      String link = linkEncode(builder.getCurrentLine());
-      builder.text("(#").text(link).text(")", true).text("   ");
+      builder.text("](#").text(linkEncode(builder.getCurrentLine())).text(")", true).text("   ");
       builder.text(codeAndLinkParse(methods[i].commentText()));
     }
     builder.endList();
@@ -109,8 +107,7 @@ public class MDDoclet extends Doclet {
     ParamTag[] params = methodDoc.paramTags();
     for (int i = 0; i < params.length; i++) {
       if (i == 0) {
-        builder.header(4).text("Parameters:", true);
-        builder.newList();
+        builder.header(4).text("Parameters:", true).newList();
       } else {
         builder.listItem();
       }
@@ -124,8 +121,7 @@ public class MDDoclet extends Doclet {
     Tag[] tags = methodDoc.tags("@return");
     for (int i = 0; i < tags.length; i++) {
       if (i == 0) {
-        builder.header(4).text("Returns:", true);
-        builder.newList();
+        builder.header(4).text("Returns:", true).newList();
       } else {
         builder.listItem();
       }
@@ -138,17 +134,11 @@ public class MDDoclet extends Doclet {
     SeeTag[] tags = methodDoc.seeTags();
     for (int i = 0; i < tags.length; i++) {
       if (i == 0) {
-        builder.header(4).text("See Also:", true);
-        builder.newList();
+        builder.header(4).text("See Also:", true).newList();
       } else {
         builder.listItem();
       }
-      SeeTag tag = tags[i];
-      if (tag.referencedMemberName() != null) {
-        builder.text(tag.referencedClassName() + "." + tag.referencedMemberName(), TextStyle.CODE);
-      } else {
-        builder.text(tag.referencedClassName(), TextStyle.CODE);
-      }
+      builder.text(tags[i].text().replace('#', '.'), TextStyle.CODE);
     }
     builder.newLine();
   }
@@ -157,8 +147,7 @@ public class MDDoclet extends Doclet {
     ThrowsTag[] tags = methodDoc.throwsTags();
     for (int i = 0; i < tags.length; i++) {
       if (i == 0) {
-        builder.header(4).text("Throws:", true);
-        builder.newList();
+        builder.header(4).text("Throws:", true).newList();
       } else {
         builder.listItem();
       }
@@ -172,11 +161,12 @@ public class MDDoclet extends Doclet {
     Parameter[] parameters = methodDoc.parameters();
     builder.text(methodDoc.returnType().simpleTypeName(), TextStyle.BOLD).text(" ");
     builder.text(methodDoc.name(), TextStyle.BOLD);
-    if (parameters.length > 0) {
+    int length = parameters.length;
+    if (length > 0) {
       builder.text("(`");
-      for (int i = 0; i < parameters.length; i++) {
+      for (int i = 0; i < length; i++) {
         builder.text(parameters[i].typeName()).text(" ").text(parameters[i].name());
-        if (i < parameters.length - 1) {
+        if (i < length - 1) {
           builder.text(", ");
         }
       }
