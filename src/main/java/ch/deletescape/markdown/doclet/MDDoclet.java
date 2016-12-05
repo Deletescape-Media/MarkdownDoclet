@@ -46,12 +46,19 @@ public class MDDoclet extends Doclet {
     builder.newList();
     MethodDoc[] methods = classDoc.methods();
     for (int i = 0; i < methods.length; i++) {
-      (i == 0 ? builder : builder.listItem()).text(methods[i].modifiers(), TextStyle.BOLD).text(" ");
+      (i == 0 ? builder : builder.listItem()).text("[").text(methods[i].modifiers(), TextStyle.BOLD).text(" ");
       methodSignature(builder, methods[i]);
-      builder.newLine().text("   ");
+      builder.text("]");
+      String link = linkEncode(builder.getCurrentLine());
+      builder.text("(#").text(link).text(")", true).text("   ");
       builder.text(codeAndLinkParse(methods[i].commentText()));
     }
     builder.endList();
+  }
+
+  private static String linkEncode(String str) {
+    String tmp = str.replaceAll("[^\\w- ]", "").trim().replace("^[(.*)]$", "$1").replaceAll(" ", "-");
+    return tmp;
   }
 
   private static void methodDetail(MDBuilder builder, ClassDoc classDoc) {

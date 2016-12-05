@@ -121,6 +121,10 @@ public class MDBuilder {
     return sb.toString();
   }
 
+  public String getCurrentLine() {
+    return sb.substring(sb.lastIndexOf("\n") + 1);
+  }
+
   public enum TextStyle {
     NONE, BOLD, ITALIC, CODE, BOLD_ITALIC, BOLD_CODE, ITALIC_CODE, BOLD_ITALIC_CODE;
   }
