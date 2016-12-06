@@ -43,6 +43,7 @@ public class MDDoclet extends Doclet {
         indexBuilder.listItem();
       }
       header(classDoc, builder);
+      builder.text(Util.codeAndLinkParse(classDoc.commentText()), true);
       MethodMDDoc.methodSummary(builder, classDoc.methods());
       MethodMDDoc.methodDetail(builder, classDoc.methods());
       String filename = filenameFromType(classDoc);
