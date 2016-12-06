@@ -105,10 +105,11 @@ public class MDDoclet extends Doclet {
 
   private static void header(ClassDoc classDoc, MDBuilder builder) {
     builder.header(1).text("Class ").text(classDoc.typeName(), true);
-    builder.text("Package ").text(classDoc.containingPackage().name(), TextStyle.CODE, true);
+    builder.text("**Package ").text(classDoc.containingPackage().name(), TextStyle.CODE).text("**", true);
     builder.text(classDoc.modifiers() + " class " + classDoc.typeName(), TextStyle.CODE).softWrap();
     builder.text("extends " + classDoc.superclassType().toString(), TextStyle.CODE, true);
     builder.text(Util.codeAndLinkParse(classDoc.commentText()), true);
+    builder.horizontalRule();
     since(classDoc, builder);
     authors(classDoc, builder);
   }
@@ -116,14 +117,14 @@ public class MDDoclet extends Doclet {
   private static void since(ClassDoc classDoc, MDBuilder builder) {
     Tag[] since = classDoc.tags("@since");
     if (since != null && since.length > 0) {
-      builder.text("Since: ", TextStyle.BOLD).text(since[0].text(), TextStyle.CODE, true);
+      builder.text("Since:", TextStyle.BOLD).softWrap().text(since[0].text(), TextStyle.CODE, true);
     }
   }
 
   private static void authors(ClassDoc classDoc, MDBuilder builder) {
     Tag[] authors = classDoc.tags("@author");
     if (authors != null && authors.length > 0) {
-      builder.text("Author:", TextStyle.BOLD, true).text("`");
+      builder.text("Author:", TextStyle.BOLD).softWrap().text("`");
       for (int i = 0; i < authors.length; i++) {
         builder.text(authors[i].text());
         if (i < authors.length - 1) {

@@ -117,6 +117,12 @@ public class MDBuilder {
     return this;
   }
 
+  public MDBuilder horizontalRule() {
+    sb.append("---");
+    newLine();
+    return this;
+  }
+
   public String get() {
     return sb.toString().replaceAll("\\n{3,}", "\n\n");
   }
