@@ -10,6 +10,7 @@ import com.sun.javadoc.ClassDoc;
 import com.sun.javadoc.DocErrorReporter;
 import com.sun.javadoc.Doclet;
 import com.sun.javadoc.RootDoc;
+import com.sun.javadoc.Tag;
 
 import ch.deletescape.markdown.MDBuilder;
 import ch.deletescape.markdown.MDBuilder.TextStyle;
@@ -43,7 +44,6 @@ public class MDDoclet extends Doclet {
         indexBuilder.listItem();
       }
       header(classDoc, builder);
-      builder.text(Util.codeAndLinkParse(classDoc.commentText()), true);
       MethodMDDoc.methodSummary(builder, classDoc.methods());
       MethodMDDoc.methodDetail(builder, classDoc.methods());
       String filename = filenameFromType(classDoc);
@@ -108,6 +108,30 @@ public class MDDoclet extends Doclet {
     builder.text("Package ").text(classDoc.containingPackage().name(), TextStyle.CODE, true);
     builder.text(classDoc.modifiers() + " class " + classDoc.typeName(), TextStyle.CODE).softWrap();
     builder.text("extends " + classDoc.superclassType().toString(), TextStyle.CODE, true);
+    builder.text(Util.codeAndLinkParse(classDoc.commentText()), true);
+    since(classDoc, builder);
+    authors(classDoc, builder);
+  }
+
+  private static void since(ClassDoc classDoc, MDBuilder builder) {
+    Tag[] since = classDoc.tags("@since");
+    if (since != null && since.length > 0) {
+      builder.text("Since: ", TextStyle.BOLD).text(since[0].text(), TextStyle.CODE, true);
+    }
+  }
+
+  private static void authors(ClassDoc classDoc, MDBuilder builder) {
+    Tag[] authors = classDoc.tags("@author");
+    if (authors != null && authors.length > 0) {
+      builder.text("Author:", TextStyle.BOLD, true).text("`");
+      for (int i = 0; i < authors.length; i++) {
+        builder.text(authors[i].text());
+        if (i < authors.length - 1) {
+          builder.text(", ");
+        }
+      }
+      builder.text("`", true);
+    }
   }
 
   private static void writeToFile(String filename, String text) {
