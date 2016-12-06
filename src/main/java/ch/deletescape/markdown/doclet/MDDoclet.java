@@ -16,11 +16,14 @@ import ch.deletescape.markdown.MDBuilder.TextStyle;
 
 public class MDDoclet extends Doclet {
   private static final String DEFAULT_EXTENSION = ".md";
+  private static final String DEFAULT_TITLE = "MDDoc";
   private static Path outDir;
   private static boolean flat;
   private static String extension;
+  private static String title;
 
   public static boolean start(RootDoc root) {
+    MDBuilder indexBuilder = new MDBuilder();
     if (outDir == null) {
       outDir = Paths.get("doc");
     }
@@ -29,13 +32,27 @@ public class MDDoclet extends Doclet {
     } else {
       Util.println("Using custom file extension \"" + extension + "\"...");
     }
+    if (title == null) {
+      title = DEFAULT_TITLE;
+    }
+    indexBuilder.header(1).text(title, true).newList();
+    boolean first = true;
     for (ClassDoc classDoc : root.classes()) {
       MDBuilder builder = new MDBuilder();
+      if (!first) {
+        indexBuilder.listItem();
+      }
       header(classDoc, builder);
       MethodMDDoc.methodSummary(builder, classDoc.methods());
       MethodMDDoc.methodDetail(builder, classDoc.methods());
-      writeToFile(filenameFromType(classDoc), builder.get());
+      String filename = filenameFromType(classDoc);
+      writeToFile(filename, builder.get());
+      indexBuilder.text("[").text(classDoc.simpleTypeName()).text("](").text(filename).text(")", true);
+      indexBuilder.text("   ").text(Util.codeAndLinkParse(classDoc.commentText()));
+      first = false;
     }
+    indexBuilder.endList();
+    writeToFile("index" + extension, indexBuilder.get());
     return true;
   }
 
@@ -54,6 +71,9 @@ public class MDDoclet extends Doclet {
         case "-extension":
           extension = opt[1];
           break;
+        case "-doctitle":
+          title = opt[1];
+          break;
       }
     }
     return true;
@@ -63,8 +83,8 @@ public class MDDoclet extends Doclet {
     switch (option) {
       case "-d":
       case "-extension":
-        // Some standard doclet options are accepted, but ignored
       case "-doctitle":
+        // Some standard doclet options are accepted, but ignored
       case "-windowtitle":
         return 2;
       case "-flat":
@@ -79,7 +99,7 @@ public class MDDoclet extends Doclet {
     if (flat) {
       return classDoc.typeName();
     }
-    return classDoc.qualifiedTypeName().replace('.', '/');
+    return classDoc.qualifiedTypeName().replace('.', '/') + extension;
   }
 
   private static void header(ClassDoc classDoc, MDBuilder builder) {
@@ -91,7 +111,7 @@ public class MDDoclet extends Doclet {
 
   private static void writeToFile(String filename, String text) {
     try {
-      Path path = outDir.resolve(filename + extension);
+      Path path = outDir.resolve(filename);
       Files.createDirectories(path.getParent());
       Files.deleteIfExists(path);
       Util.println("Writing to " + path.toString() + "...");
