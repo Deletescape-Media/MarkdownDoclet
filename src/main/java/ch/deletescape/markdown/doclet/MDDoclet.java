@@ -63,6 +63,9 @@ public class MDDoclet extends Doclet {
     switch (option) {
       case "-d":
       case "-extension":
+        // Some standard doclet options are accepted, but ignored
+      case "-doctitle":
+      case "-windowtitle":
         return 2;
       case "-flat":
       case "-quiet":
